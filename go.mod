@@ -5,7 +5,11 @@ go 1.16
 require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/Microsoft/go-winio v0.5.0 // indirect
+<<<<<<< HEAD
 	github.com/Shopify/sarama v1.27.0
+=======
+	github.com/Shopify/sarama v1.28.0
+>>>>>>> e3085af ((+semver: fix) Update protoc usage to work with macOS and newer golang)
 	github.com/agnivade/levenshtein v1.1.0 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
@@ -40,8 +44,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/syncromatics/go-kit v1.5.1
 	github.com/syncromatics/proto-schema-registry v0.7.3
-	github.com/vektah/dataloaden v0.3.0 // indirect
-	github.com/vektah/gqlparser/v2 v2.1.0
+	github.com/vektah/gqlparser/v2 v2.2.0
 	github.com/yargevad/filepathx v0.0.0-20161019152617-907099cb5a62
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0 // indirect
