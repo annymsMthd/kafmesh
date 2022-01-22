@@ -38,6 +38,7 @@ processors:
         description: Enriched device details
         type: protobuf
         partitions: 10
+        maxMessageBytes: 900876
     persistence:
       message: kafmesh.deviceId.enrichedDetailsState
       type: protobuf
@@ -67,6 +68,7 @@ viewSinks:
 	}
 
 	partition := 10
+	maxBytes := 900876
 	topicType := "protobuf"
 	groupName := "kafmesh.deviceId.enrichedDetail"
 	assert.Equal(t, &models.Component{
@@ -74,7 +76,7 @@ viewSinks:
 		Description: "The details component handles the flow for device details.",
 
 		Sources: []models.Source{
-			models.Source{
+			{
 				TopicDefinition: models.TopicDefinition{
 					Message: "kafmesh.deviceId.detail",
 					Type:    &topicType,
@@ -86,19 +88,19 @@ viewSinks:
 		},
 
 		Processors: []models.Processor{
-			models.Processor{
+			{
 				Name:              "proc",
 				GroupNameOverride: &groupName,
 				Description:       "Provides enriched device details with customer information.",
 
 				Inputs: []models.Input{
-					models.Input{
+					{
 						TopicDefinition: models.TopicDefinition{
 							Message: "kafmesh.deviceId.detail",
 							Type:    &topicType,
 						},
 					},
-					models.Input{
+					{
 						TopicDefinition: models.TopicDefinition{
 							Message: "kafmesh.deviceId.customer",
 						},
@@ -106,7 +108,7 @@ viewSinks:
 				},
 
 				Lookups: []models.Lookup{
-					models.Lookup{
+					{
 						TopicDefinition: models.TopicDefinition{
 							Message: "kafmesh.customerId.details",
 							Type:    &topicType,
@@ -115,7 +117,7 @@ viewSinks:
 				},
 
 				Joins: []models.Join{
-					models.Join{
+					{
 						TopicDefinition: models.TopicDefinition{
 							Message: "kafmesh.customerId.details",
 							Type:    &topicType,
@@ -124,13 +126,14 @@ viewSinks:
 				},
 
 				Outputs: []models.Output{
-					models.Output{
+					{
 						TopicDefinition: models.TopicDefinition{
 							Message: "kafmesh.deviceId.enrichedDetail",
 							Type:    &topicType,
 						},
 						TopicCreationDefinition: models.TopicCreationDefinition{
-							Partitions: &partition,
+							Partitions:      &partition,
+							MaxMessageBytes: &maxBytes,
 						},
 						Description: "Enriched device details",
 					},
@@ -146,7 +149,7 @@ viewSinks:
 		},
 
 		Sinks: []models.Sink{
-			models.Sink{
+			{
 				Name:        "Enriched Detail Warehouse Sink",
 				Description: "Sinks enriched device details to the warehouse database.",
 				TopicDefinition: models.TopicDefinition{
@@ -157,7 +160,7 @@ viewSinks:
 		},
 
 		ViewSources: []models.ViewSource{
-			models.ViewSource{
+			{
 				TopicDefinition: models.TopicDefinition{
 					Message: "kafmesh.deviceId.customer",
 					Type:    &topicType,
@@ -169,7 +172,7 @@ viewSinks:
 			},
 		},
 		ViewSinks: []models.ViewSink{
-			models.ViewSink{
+			{
 				TopicDefinition: models.TopicDefinition{
 					Message: "kafmesh.deviceId.detail",
 					Type:    &topicType,

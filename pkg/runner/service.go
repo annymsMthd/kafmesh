@@ -17,13 +17,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-// KafaConfigurator configures the kafka topics require to run the service
-type KafaConfigurator func(ctx context.Context, brokers []string) error
+// KafkaConfigurator configures the kafka topics require to run the service
+type KafkaConfigurator func(ctx context.Context, brokers []string) error
 
 // ServiceOptions are the options passed to services
 type ServiceOptions struct {
 	Brokers      []string
 	ProtoWrapper *ProtoWrapper
+	SaramaConfig *sarama.Config
 }
 
 // Service is the kafmesh service
@@ -33,6 +34,7 @@ type Service struct {
 	server       *grpc.Server
 	Metrics      *Metrics
 	watcher      *observability.Watcher
+	SaramaConfig *sarama.Config
 
 	mtx          sync.Mutex
 	configured   bool
@@ -59,10 +61,37 @@ func NewService(brokers []string, protoRegistry *Registry, grpcServer *grpc.Serv
 	return service
 }
 
+// CreateServiceOptions options for creating a new service
+type CreateServiceOptions struct {
+	Brokers       []string
+	ProtoRegistry *Registry
+	GrpcServer    *grpc.Server
+	SaramaConfig  *sarama.Config
+}
+
+// NewServiceWithOptions creates a new kafmesh service with options
+func NewServiceWithOptions(options CreateServiceOptions) *Service {
+	service := &Service{
+		brokers:      options.Brokers,
+		protoWrapper: NewProtoWrapper(options.ProtoRegistry),
+		server:       options.GrpcServer,
+		DiscoverInfo: &discoveryv1.Service{},
+		Metrics:      NewMetrics(),
+		watcher:      &observability.Watcher{},
+		SaramaConfig: options.SaramaConfig,
+	}
+
+	pingv1.RegisterPingAPIServer(options.GrpcServer, &services.PingAPI{})
+	discoveryv1.RegisterDiscoveryAPIServer(options.GrpcServer, &services.DiscoverAPI{DiscoverInfo: service.DiscoverInfo})
+	watchv1.RegisterWatchAPIServer(options.GrpcServer, &services.WatcherService{Watcher: service.watcher})
+
+	return service
+}
+
 // ConfigureKafka waits for kafka to be ready and configures the topics
 // for this service. It will also check if topics it doesn't create exist
 // in the correct configuration.
-func (s *Service) ConfigureKafka(ctx context.Context, configurator KafaConfigurator) error {
+func (s *Service) ConfigureKafka(ctx context.Context, configurator KafkaConfigurator) error {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 	err := s.waitForKafkaToBeReady(ctx)
@@ -130,6 +159,7 @@ func (s *Service) Options() ServiceOptions {
 	return ServiceOptions{
 		Brokers:      s.brokers,
 		ProtoWrapper: s.protoWrapper,
+		SaramaConfig: s.SaramaConfig,
 	}
 }
 

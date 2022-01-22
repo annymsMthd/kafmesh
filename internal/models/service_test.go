@@ -34,6 +34,7 @@ defaults:
   type : "protobuf"
   retention: 240h
   segment: 24h
+  maxMessageBytes: 8675309
 `
 
 	service, err := models.ParseService(bytes.NewBuffer([]byte(schema)))
@@ -41,6 +42,7 @@ defaults:
 		t.Fatal(err)
 	}
 
+	maxBytes := 8675309
 	assert.Equal(t, &models.Service{
 		Name:        "kafmesh",
 		Description: "Kafmesh service is an example service to test kafmesh.",
@@ -60,11 +62,12 @@ defaults:
 			"./components/*.yaml",
 		},
 		Defaults: models.TopicDefaults{
-			Partition:   10,
-			Replication: 3,
-			Type:        "protobuf",
-			Retention:   10 * 24 * time.Hour,
-			Segment:     24 * time.Hour,
+			Partition:       10,
+			Replication:     3,
+			Type:            "protobuf",
+			Retention:       10 * 24 * time.Hour,
+			Segment:         24 * time.Hour,
+			MaxMessageBytes: &maxBytes,
 		},
 	}, service)
 }

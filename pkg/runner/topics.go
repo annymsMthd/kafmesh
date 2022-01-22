@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,13 +14,14 @@ import (
 
 // Topic is a definition for a kafka topic
 type Topic struct {
-	Name       string
-	Partitions int
-	Replicas   int
-	Compact    bool
-	Retention  time.Duration
-	Segment    time.Duration
-	Create     bool
+	Name            string
+	Partitions      int
+	Replicas        int
+	Compact         bool
+	Retention       time.Duration
+	Segment         time.Duration
+	MaxMessageBytes *int
+	Create          bool
 }
 
 // ConfigureTopics configures and checks topics in the slice passed.
@@ -73,6 +75,11 @@ func ConfigureTopics(ctx context.Context, brokers []string, topics []Topic) erro
 		if topic.Compact {
 			c := "compact"
 			config["cleanup.policy"] = &c
+		}
+
+		if topic.MaxMessageBytes != nil {
+			m := strconv.Itoa(*topic.MaxMessageBytes)
+			config["max.message.bytes"] = &m
 		}
 
 		if !exists {

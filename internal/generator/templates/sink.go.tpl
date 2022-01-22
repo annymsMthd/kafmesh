@@ -94,7 +94,7 @@ func Register_{{ .Name }}_Sink(options runner.ServiceOptions, sink {{ .Name }}_S
 		interval:      interval,
 	}
 
-	s := runner.NewSinkRunner(d, brokers)
+	s := runner.NewSinkRunner(d, brokers, options.SaramaConfig)
 
 	return func(ctx context.Context) func() error {
 		return s.Run(ctx)

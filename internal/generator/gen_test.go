@@ -81,6 +81,10 @@ message DetailsEnriched {
 }`), os.ModePerm)
 
 	rawType := "raw"
+	maxBytes := 45235423
+	otherMaxBytes := 992342
+	replicas := 90
+	partions := 80
 	externalTopicName := "externalTopic"
 	newPath := path.Join(tmpDir, "defin")
 	options := generator.Options{
@@ -97,11 +101,12 @@ message DetailsEnriched {
 				},
 			},
 			Defaults: models.TopicDefaults{
-				Partition:   10,
-				Replication: 1,
-				Retention:   24 * time.Hour,
-				Segment:     12 * time.Hour,
-				Type:        "protobuf",
+				Partition:       10,
+				Replication:     1,
+				Retention:       24 * time.Hour,
+				Segment:         12 * time.Hour,
+				Type:            "protobuf",
+				MaxMessageBytes: &maxBytes,
 			},
 		},
 		RootPath:        newPath,
@@ -142,6 +147,11 @@ message DetailsEnriched {
 							{
 								TopicDefinition: models.TopicDefinition{
 									Message: "testSerial.detailsEnriched",
+								},
+								TopicCreationDefinition: models.TopicCreationDefinition{
+									MaxMessageBytes: &otherMaxBytes,
+									Replicas:        &replicas,
+									Partitions:      &partions,
 								},
 							},
 						},

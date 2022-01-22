@@ -136,13 +136,14 @@ func (t TopicDefinition) ToMessageTypeWithPackage() string {
 	return nameFrags[len(nameFrags)-2] + "." + strcase.ToCamel(nameFrags[len(nameFrags)-1])
 }
 
-// TopicCreationDefinition describe how a topic should be created
+// TopicCreationDefinition describes how a topic should be created
 type TopicCreationDefinition struct {
-	Partitions *int
-	Replicas   *int
-	Compact    *bool
-	Retention  *time.Duration
-	Segment    *time.Duration
+	Partitions      *int           `yaml:"partitions,omitempty"`
+	Replicas        *int           `yaml:"replicas,omitempty"`
+	Compact         *bool          `yaml:"compact,omitempty"`
+	Retention       *time.Duration `yaml:"retention,omitempty"`
+	Segment         *time.Duration `yaml:"segment,omitempty"`
+	MaxMessageBytes *int           `yaml:"maxMessageBytes,omitempty"`
 }
 
 // Source is a producer into kafka

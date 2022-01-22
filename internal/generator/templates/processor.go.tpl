@@ -134,11 +134,14 @@ func Register_{{ .Name }}_Processor(service *runner.Service, impl {{ .Name }}_Pr
 	brokers := options.Brokers
 	protoWrapper := options.ProtoWrapper
 
-	config := sarama.NewConfig()
-	config.Version = sarama.MaxVersion
-	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	config.Consumer.Offsets.AutoCommit.Enable = true
-	config.Consumer.Offsets.CommitInterval = 1 * time.Second
+	config := service.SaramaConfig
+	if config == nil {
+		config = sarama.NewConfig()
+		config.Version = sarama.MaxVersion
+		config.Consumer.Offsets.Initial = sarama.OffsetOldest
+		config.Consumer.Offsets.AutoCommit.Enable = true
+		config.Consumer.Offsets.CommitInterval = 1 * time.Second
+	}
 
 	opts := &opt.Options{
 		BlockCacheCapacity: opt.MiB * 1,
@@ -215,7 +218,9 @@ func Register_{{ .Name }}_Processor(service *runner.Service, impl {{ .Name }}_Pr
 		group,
 		goka.WithConsumerGroupBuilder(goka.ConsumerGroupBuilderWithConfig(config)),
 		goka.WithStorageBuilder(builder),
-		goka.WithHasher(kafkautil.MurmurHasher))
+		goka.WithHasher(kafkautil.MurmurHasher),
+		goka.WithProducerBuilder(goka.ProducerBuilderWithConfig(config)),
+		goka.WithConsumerSaramaBuilder(goka.SaramaConsumerBuilderWithConfig(config)))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create goka processor")
 	}

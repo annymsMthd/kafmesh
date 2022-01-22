@@ -29,11 +29,12 @@ type OutputSettings struct {
 
 // TopicDefaults are the default kafka settings for the service
 type TopicDefaults struct {
-	Partition   int
-	Replication int
-	Type        string
-	Retention   time.Duration
-	Segment     time.Duration
+	Partition       int
+	Replication     int
+	Type            string
+	Retention       time.Duration
+	Segment         time.Duration
+	MaxMessageBytes *int `yaml:"maxMessageBytes,omitempty"`
 }
 
 // MessageDefinitions define where to locate the schema for the messages.

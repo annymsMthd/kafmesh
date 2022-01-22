@@ -18,13 +18,14 @@ var (
 )
 
 type topicDefinition struct {
-	Name       string
-	Partitions *int
-	Replicas   *int
-	Compact    *bool
-	Retention  *time.Duration
-	Segment    *time.Duration
-	Create     bool
+	Name            string
+	Partitions      *int
+	Replicas        *int
+	Compact         *bool
+	Retention       *time.Duration
+	Segment         *time.Duration
+	Create          bool
+	MaxMessageBytes *int
 }
 
 type topicOptions struct {
@@ -207,6 +208,12 @@ func buildTopicOption(service *models.Service, components []*models.Component) (
 		} else {
 			topic.Compact = *tp.Compact
 		}
+
+		if tp.MaxMessageBytes == nil {
+			topic.MaxMessageBytes = service.Defaults.MaxMessageBytes
+		} else {
+			topic.MaxMessageBytes = tp.MaxMessageBytes
+		}
 	}
 
 	sort.Slice(t, func(i, j int) bool {
@@ -259,6 +266,14 @@ func updateTopicCreate(topic *topicDefinition, definition models.TopicCreationDe
 		}
 
 		topic.Segment = definition.Segment
+	}
+
+	if definition.MaxMessageBytes != nil {
+		if topic.MaxMessageBytes != nil && *topic.MaxMessageBytes != *definition.MaxMessageBytes {
+			return errors.Errorf("topic '%s' has two different MaxMessageBytes configurations", topic.Name)
+		}
+
+		topic.MaxMessageBytes = definition.MaxMessageBytes
 	}
 
 	return nil

@@ -29,3 +29,6 @@ ship:
 	docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
 	docker build -t syncromatics/kafmesh-discovery:${VERSION} --target final .
 	docker push syncromatics/kafmesh-discovery:${VERSION}
+
+update-snapshots:
+	UPDATE_SNAPSHOTS=true go test ./...

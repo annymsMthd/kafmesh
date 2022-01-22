@@ -34,13 +34,15 @@ type MessageContext struct {
 type SinkRunner struct {
 	definition SinkDefinition
 	brokers    []string
+	config     *sarama.Config
 }
 
 // NewSinkRunner create a new sink runner
-func NewSinkRunner(definition SinkDefinition, brokers []string) *SinkRunner {
+func NewSinkRunner(definition SinkDefinition, brokers []string, config *sarama.Config) *SinkRunner {
 	return &SinkRunner{
 		definition: definition,
 		brokers:    brokers,
+		config:     config,
 	}
 }
 
@@ -48,10 +50,15 @@ func NewSinkRunner(definition SinkDefinition, brokers []string) *SinkRunner {
 func (r *SinkRunner) Run(ctx context.Context) func() error {
 	return func() error {
 		config := cluster.NewConfig()
-		config.Consumer.Offsets.Initial = sarama.OffsetOldest
-		config.Consumer.Offsets.AutoCommit.Enable = true
-		config.Consumer.Offsets.CommitInterval = 1 * time.Second
-		config.Version = sarama.MaxVersion
+
+		if r.config == nil {
+			config.Consumer.Offsets.Initial = sarama.OffsetOldest
+			config.Consumer.Offsets.AutoCommit.Enable = true
+			config.Consumer.Offsets.CommitInterval = 1 * time.Second
+			config.Version = sarama.MaxVersion
+		} else {
+			config.Consumer = r.config.Consumer
+		}
 
 		cg, err := cluster.NewConsumer(r.brokers, r.definition.Group(), []string{r.definition.Topic()}, config)
 		if err != nil {
